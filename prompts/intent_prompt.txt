@@ -1,0 +1,12 @@
+Analyze this research query and return JSON with exactly these keys:
+- domain: one of ["Market", "Technical", "Financial", "Strategic", "Mixed"]
+- entities: list of key people, companies, technologies mentioned
+- timeframe: one of ["Immediate", "Short-term", "Medium-term", "Long-term"]
+- geographic_scope: one of ["Global", "Regional", "Local"]
+- urgency: one of ["High", "Medium", "Low"]
+- objective: one sentence describing what the user really wants to know
+- assumptions: list of things the query assumes to be true
+
+Query: {query}
+
+Return only valid JSON, no prose.

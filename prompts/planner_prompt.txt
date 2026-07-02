@@ -1,0 +1,15 @@
+Break this research query into 3-5 specific research tasks.
+
+Query: {query}
+Intent: {intent}
+{gap_context}
+
+Return a JSON array where each task has:
+- id: short identifier like "task_1"
+- title: short task name
+- description: one-sentence research instruction
+- priority: "High" | "Medium" | "Low"
+- complexity: "Simple" | "Moderate" | "Complex"
+- dependencies: list of task ids that must complete first (empty = parallel)
+
+Return only valid JSON, no prose.

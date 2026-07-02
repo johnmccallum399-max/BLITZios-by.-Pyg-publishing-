@@ -1,0 +1,10 @@
+Analyze these research snippets for factual contradictions:
+
+{sources_text}
+
+Return a JSON array (possibly empty). Each contradiction:
+- source_1: index of first source
+- source_2: index of second source
+- contradiction: one sentence describing the conflict
+
+Return only valid JSON, no prose.

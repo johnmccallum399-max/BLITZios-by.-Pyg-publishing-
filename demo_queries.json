@@ -1,0 +1,28 @@
+{
+  "demo_queries": [
+    {
+      "id": 1,
+      "domain": "Market",
+      "query": "What are the top 3 trends in AI-powered legal tech for 2025?"
+    },
+    {
+      "id": 2,
+      "domain": "Technical",
+      "query": "What's the best open-source vector database for production use in 2025?"
+    },
+    {
+      "id": 3,
+      "domain": "Financial",
+      "query": "What's the projected CAGR for the generative AI market through 2028?"
+    }
+  ],
+  "success_criteria": {
+    "min_tasks_per_query": 3,
+    "min_source_types_per_query": 2,
+    "max_seconds_per_query": 180,
+    "max_cost_per_query_usd": 0.5,
+    "requires_confidence_score": true,
+    "requires_gap_identification": true,
+    "requires_follow_up_question": true
+  }
+}

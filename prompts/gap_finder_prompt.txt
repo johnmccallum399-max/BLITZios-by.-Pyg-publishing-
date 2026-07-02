@@ -1,0 +1,22 @@
+Analyze this research run and identify knowledge gaps.
+
+Query: {query}
+Intent: {intent}
+Tasks executed: {task_titles}
+Evidence count: {evidence_count}
+Source types used: {source_types}
+Average confidence: {confidence}
+
+Consider:
+1. What perspectives are missing?
+2. What assumptions have not been tested?
+3. What would cause conclusions based on this evidence to fail?
+4. What adjacent topics could change the answer?
+
+Return JSON with:
+- gaps: list of at most 4 short gap descriptions
+- follow_up_question: the single most valuable next question (string)
+- priority: "High" | "Medium" | "Low"
+- reasoning: one sentence
+
+Return only valid JSON, no prose.
