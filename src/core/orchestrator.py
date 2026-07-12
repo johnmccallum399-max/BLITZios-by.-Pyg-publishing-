@@ -141,9 +141,14 @@ class BLITZOrchestrator:
     def _respond(self, state: BLITZState) -> BLITZState:
         """MODULE_F — synthesize everything into a human-readable report."""
         confidence = state["scores"].get("average_confidence", 0)
+        mode = Config.capability_mode()
 
         sections = [
             f"## Research Results: {state['query']}",
+            "",
+            f"> **Mode: {mode['label']}** — reasoning: {mode['reasoning']}; "
+            f"evidence: {mode['evidence']}."
+            + (f" To upgrade: {mode['upgrade']}" if mode["upgrade"] else ""),
             "",
             "### Summary",
             f"Based on {len(state['evidence'])} evidence items from "

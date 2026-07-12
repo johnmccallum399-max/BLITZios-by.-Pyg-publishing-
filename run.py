@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Launcher: starts the API server and the Streamlit UI together."""
 
-import os
 import subprocess
 import sys
 import time
@@ -16,15 +15,29 @@ BANNER = r"""
 """
 
 
-def check_api_key() -> bool:
-    from dotenv import load_dotenv
-
-    load_dotenv()
-    if not (os.getenv("OPENAI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")):
-        print("WARNING: no LLM API key set in .env — running in heuristic mode.")
-    if not os.getenv("SERPAPI_API_KEY"):
-        print("WARNING: SERPAPI_API_KEY not set — web evidence will be mocked.")
+def check_dependencies() -> bool:
+    missing = []
+    for module in ("uvicorn", "fastapi", "streamlit", "langgraph"):
+        try:
+            __import__(module)
+        except ImportError:
+            missing.append(module)
+    if missing:
+        print(f"ERROR: missing dependencies: {', '.join(missing)}")
+        print("Fix:   pip install -r requirements.txt")
+        return False
     return True
+
+
+def print_mode():
+    from src.core.config import Config
+
+    mode = Config.capability_mode()
+    print(f"Mode: {mode['label']}")
+    print(f"  What to expect: {mode['expect']}")
+    if mode["upgrade"]:
+        print(f"  To upgrade:     {mode['upgrade']}")
+    print()
 
 
 def start_services():
@@ -56,5 +69,7 @@ def start_services():
 
 if __name__ == "__main__":
     print(BANNER)
-    check_api_key()
+    if not check_dependencies():
+        sys.exit(1)
+    print_mode()
     start_services()

@@ -25,6 +25,20 @@ if "history" not in st.session_state:
 st.markdown('<div class="main-header">🧠 BLITZ Intelligence OS</div>', unsafe_allow_html=True)
 st.markdown("Strategic Research & Decision Intelligence Platform")
 
+# Mode banner: always tell the user what this session will actually deliver.
+try:
+    _health = requests.get(f"{API_URL}/health", timeout=5).json()
+    _label = _health.get("mode_label", "Unknown mode")
+    _expect = _health.get("expectations", "")
+    _upgrade = _health.get("upgrade_hint", "")
+    if _health.get("mode") == "full":
+        st.success(f"**{_label}** — {_expect}")
+    else:
+        st.warning(f"**{_label}** — {_expect}" + (f" _{_upgrade}_" if _upgrade else ""))
+except requests.RequestException:
+    st.error("Backend API is not running. Start it with: `python run.py` "
+             "(or `uvicorn src.api.routes:app`)")
+
 with st.sidebar:
     st.markdown("### ⚙️ Controls")
     max_iterations = st.slider("Max Research Iterations", 1, 5, 3)

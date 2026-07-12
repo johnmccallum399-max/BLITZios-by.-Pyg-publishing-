@@ -76,11 +76,20 @@ def get_stats():
 
 @app.get("/health")
 def health():
+    mode = Config.capability_mode()
     return {
         "status": "ok",
         "offline_mode": Config.OFFLINE_MODE,
         "llm_configured": bool(Config.OPENAI_API_KEY or Config.ANTHROPIC_API_KEY),
         "web_search_configured": bool(Config.SERPAPI_API_KEY),
+        "mode": mode["mode"],
+        "mode_label": mode["label"],
+        "expectations": mode["expect"],
+        "upgrade_hint": mode["upgrade"],
+        "cost_guards": {
+            "max_cost_per_query_usd": Config.MAX_COST_PER_QUERY,
+            "max_iterations": Config.MAX_ITERATIONS,
+        },
     }
 
 
