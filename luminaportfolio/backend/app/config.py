@@ -19,7 +19,12 @@ class Settings(BaseSettings):
     max_image_bytes: int = 25 * 1024 * 1024
     fetch_timeout_seconds: float = 20.0
 
+    # In production set LUMINA_CORS_ORIGINS='["https://your-app.vercel.app"]'
     cors_origins: list[str] = ["http://localhost:3000"]
+
+    # Public base URL of this API (used by Google OAuth redirect in production)
+    # e.g. https://luminaportfolio-api.onrender.com
+    public_url: str = "http://localhost:8000"
 
 
 settings = Settings()
