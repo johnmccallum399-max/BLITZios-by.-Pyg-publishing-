@@ -1,14 +1,5 @@
 {
   "framework": "nextjs",
   "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "rewrites": [
-    {
-      "source": "/api/v1/:path*",
-      "destination": "https://luminaportfolio-api.onrender.com/api/v1/:path*"
-    }
-  ],
-  "env": {
-    "NEXT_PUBLIC_API_URL": "https://luminaportfolio-api.onrender.com"
-  }
+  "outputDirectory": ".next"
 }

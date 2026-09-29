@@ -70,8 +70,10 @@ npm install
 npm run dev   # → http://localhost:3000
 ```
 
-The frontend proxies `/api/v1/*` to the backend, so both must be running
-locally. In production set `NEXT_PUBLIC_API_URL` to your deployed backend URL.
+The frontend calls `/api/v1/*` on its own origin. The Next.js rewrite proxies
+those requests to `http://localhost:8000` locally. In production, set
+`NEXT_PUBLIC_API_URL` to your deployed backend origin (without `/api/v1`);
+the same rewrite uses that value.
 
 ## Tests
 
@@ -104,10 +106,11 @@ fixtures or network access are required.
 
 1. Go to [vercel.com](https://vercel.com) → **Add New Project**.
 2. Import this GitHub repo, set **Root Directory** to `luminaportfolio/frontend`.
-3. Vercel reads `vercel.json` automatically.
-4. Update the `destination` URL in `vercel.json` to your actual Render URL,
-   or set `NEXT_PUBLIC_API_URL` in **Vercel → Settings → Environment Variables**.
-5. Deploy — Vercel rebuilds on every push to `main`.
+3. Set `NEXT_PUBLIC_API_URL` in **Vercel → Settings → Environment Variables**
+   to your actual Render backend origin (for example,
+   `https://luminaportfolio-api.onrender.com`), for each deployment environment.
+   Redeploy after changing it so Next.js picks up the new rewrite destination.
+4. Deploy — Vercel rebuilds on every push to `main`.
 
 ### Alternative: Railway / Heroku
 
