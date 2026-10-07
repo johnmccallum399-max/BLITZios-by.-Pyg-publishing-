@@ -1,0 +1,34 @@
+# Render.com service definition for the LuminaPortfolio API.
+# Push this repo to GitHub, connect it in Render, and it will deploy automatically.
+#
+# Free-tier note: the free instance spins down after 15 minutes of inactivity
+# and takes ~30 s to cold-start. Upgrade to Starter ($7/mo) to keep it live.
+
+services:
+  - type: web
+    name: luminaportfolio-api
+    runtime: python
+    rootDir: luminaportfolio/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    healthCheckPath: /health
+
+    envVars:
+      # Set these in the Render dashboard — never commit real values here.
+      - key: LUMINA_GOOGLE_CLIENT_ID
+        sync: false
+      - key: LUMINA_GOOGLE_CLIENT_SECRET
+        sync: false
+      # e.g. https://luminaportfolio-api.onrender.com/api/v1/google/callback
+      - key: LUMINA_GOOGLE_REDIRECT_URI
+        sync: false
+      # e.g. ["https://your-app.vercel.app","https://your-custom-domain.com"]
+      - key: LUMINA_CORS_ORIGINS
+        sync: false
+      # e.g. https://luminaportfolio-api.onrender.com
+      - key: LUMINA_PUBLIC_URL
+        sync: false
+      # Optional — raise above default 150 for smartphone photos
+      - key: LUMINA_SHARPNESS_THRESHOLD
+        value: "150"
