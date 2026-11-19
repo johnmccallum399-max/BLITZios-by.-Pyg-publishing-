@@ -184,12 +184,17 @@ class BLITZOrchestrator:
     def _format_evidence(evidence) -> str:
         if not evidence:
             return "No evidence gathered."
+        # Real evidence first: with several sources, mock web placeholders
+        # must not push real citations below the five shown.
+        evidence = sorted(evidence, key=lambda e: bool(e.get("mock")))
         lines = []
         for i, item in enumerate(evidence[:5], 1):
             title = item.get("title", "Unknown source")
             snippet = (item.get("snippet", "") or "")[:150]
             link = item.get("link", "")
-            lines.append(f"{i}. **{title}**\n   {snippet}\n   {link}")
+            source = item.get("source", "")
+            tag = f" ({source})" if source else ""
+            lines.append(f"{i}. **{title}**{tag}\n   {snippet}\n   {link}")
         if len(evidence) > 5:
             lines.append(f"...and {len(evidence) - 5} more evidence items.")
         return "\n\n".join(lines)

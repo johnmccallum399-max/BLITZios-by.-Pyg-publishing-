@@ -27,7 +27,7 @@ python run.py                     # web UI at http://localhost:8501
 python -m src.cli "What are the top 3 trends in AI-powered legal tech for 2025?"
 ```
 
-**API keys are optional.** Without them, BLITZ runs a free demo mode that exercises the full workflow on placeholder evidence. To do real research, copy `.env.example` to `.env` and add keys (see next section) — no code changes needed.
+**API keys are optional.** Without them, BLITZ runs a free demo mode that exercises the full workflow with real Wikipedia, ArXiv and GitHub evidence plus placeholder web results. To do real research, copy `.env.example` to `.env` and add keys (see next section) — no code changes needed.
 
 ## What to expect — by mode
 
@@ -35,12 +35,24 @@ python -m src.cli "What are the top 3 trends in AI-powered legal tech for 2025?"
 
 | Mode | You have | Speed / cost per query | What the output means |
 |---|---|---|---|
-| **Full intelligence** | LLM key + `SERPAPI_API_KEY` | ~30s–3min, ≤ $0.50 (hard-enforced) | Real research: cited web + academic sources, LLM planning, contradiction checks |
-| **LLM reasoning, mock evidence** | LLM key only | seconds, ≤ $0.50 | Smart analysis of placeholder data — confidence capped at 40%, don't act on it |
-| **Real evidence, heuristic reasoning** | `SERPAPI_API_KEY` only | ~10–60s, $0 | Real sources gathered and scored; planning/gap analysis uses fixed rules |
-| **Heuristic demo** | no keys | ~1s, $0 | Full workflow on placeholder data — confidence capped at 40%, don't act on it |
+| **Full intelligence** | LLM key + `SERPAPI_API_KEY` | ~30s–3min, ≤ $0.50 (hard-enforced) | Real research: cited web, Wikipedia, ArXiv, GitHub (and news with `NEWSAPI_KEY`), LLM planning, contradiction checks |
+| **LLM reasoning, mock web evidence** | LLM key only | seconds, ≤ $0.50 | Smart analysis; Wikipedia, ArXiv and GitHub are real but web results are placeholders — confidence capped at 40%, don't act on it |
+| **Real evidence, heuristic reasoning** | `SERPAPI_API_KEY` only | ~10–60s, $0 | Real sources (web, Wikipedia, ArXiv, GitHub) gathered and scored; planning/gap analysis uses fixed rules |
+| **Heuristic demo** | no keys | a few seconds, $0 | Full workflow; Wikipedia, ArXiv and GitHub are real but web results are placeholders — confidence capped at 40%, don't act on it |
 
-LLM key = `OPENAI_API_KEY` (preferred) or `ANTHROPIC_API_KEY` in `.env`.
+LLM key = `OPENAI_API_KEY` (preferred) or `ANTHROPIC_API_KEY` in `.env`. Set `BLITZ_OFFLINE=1` for the instant, zero-network demo.
+
+## Research sources
+
+| Source | Type label | Key | Used for |
+|---|---|---|---|
+| SerpAPI (Google) | `web` | `SERPAPI_API_KEY` (mocked without it) | every task |
+| Wikipedia | `encyclopedia` | none | every task: background and definitions |
+| ArXiv | `academic` | none | academic or technical tasks |
+| GitHub | `code` | none (`GITHUB_TOKEN` raises the rate limit) | tasks about software, tools, open source |
+| NewsAPI | `news` | `NEWSAPI_KEY` (skipped without it) | tasks about markets, trends, recent events |
+
+A source that fails or is rate-limited returns nothing and the run continues; the gap analysis notes thin coverage. Switch sources off with `BLITZ_SOURCES` (default `web,academic,encyclopedia,code,news`). The validator weights them academic > encyclopedia > news > code > web.
 
 **Guarantees in every mode:**
 
@@ -65,7 +77,7 @@ Same data over HTTP: `GET /stats`, `GET /search/{term}`. The web UI shows totals
 
 ```
 Query → Intent Detection → Task Decomposition (3–5 task DAG) →
-Parallel Research (SerpAPI web + ArXiv academic) →
+Parallel Research (web · Wikipedia · ArXiv · GitHub · news, routed per task) →
 Evidence Validation (credibility · recency · strength · contradictions) →
 Gap Detection → iterate if gaps remain (bounded) →
 Report → Knowledge Archive (JSONL)
@@ -91,7 +103,8 @@ pytest
 ```
 src/core/       config, state + JSONL archive, LangGraph orchestrator
 src/agents/     intent_engine, planner, researcher, validator, gap_finder
-src/tools/      model_router (LLM + cost tracking), web_search, arxiv_tool
+src/tools/      model_router (LLM + cost tracking), web_search, arxiv_tool,
+                wikipedia_tool, github_tool, news_tool
 src/api/        FastAPI routes
 src/ui/         Streamlit dashboard
 prompts/        editable prompt templates

@@ -53,8 +53,10 @@
 
 ## Next Phases
 
-1. **Phase 2 — Research Engine**: more sources (NewsAPI, GitHub, Wikipedia),
-   vector-embedding search over the archive (ChromaDB), dashboard analytics
+1. **Phase 2 — Research Engine**
+   - [x] More sources: Wikipedia and GitHub (keyless), NewsAPI (keyed), routed per task, each switchable via `BLITZ_SOURCES`
+   - [ ] Vector-embedding search over the archive (ChromaDB)
+   - [ ] Dashboard analytics
 2. **Phase 3 — Intelligent System**: knowledge graph, advanced validation,
    automated follow-up execution, investor-ready report generation
 3. **Phase 4 — Enterprise Platform**: multi-project management, team

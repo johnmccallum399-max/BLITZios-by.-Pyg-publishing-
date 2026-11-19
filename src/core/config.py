@@ -5,7 +5,7 @@ from the environment without touching code.
 """
 
 import os
-from typing import Dict
+from typing import Dict, List
 
 from dotenv import load_dotenv
 
@@ -24,6 +24,17 @@ class Config:
     ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
     SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY", "")
     NEWSAPI_KEY = os.getenv("NEWSAPI_KEY", "")
+    # Optional: raises GitHub search from ~10 to ~30 requests/minute.
+    GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
+
+    # Research sources the researcher may use (comma-separated). Remove one to
+    # switch it off. "web" always runs (mocked without SERPAPI_API_KEY);
+    # "news" also needs NEWSAPI_KEY.
+    ENABLED_SOURCES = frozenset(
+        s.strip().lower()
+        for s in os.getenv("BLITZ_SOURCES", "web,academic,encyclopedia,code,news").split(",")
+        if s.strip()
+    )
 
     # Force offline mode: no network calls at all (mock evidence, heuristic agents).
     # Useful for tests, demos, and development without burning API quota.
@@ -67,6 +78,36 @@ class Config:
         return (input_tokens * costs["input"] + output_tokens * costs["output"]) / 1000
 
     @classmethod
+    def source_enabled(cls, source: str) -> bool:
+        return source in cls.ENABLED_SOURCES
+
+    @classmethod
+    def live_sources(cls) -> List[str]:
+        """Real (non-mock) evidence sources that will be queried right now."""
+        if cls.OFFLINE_MODE:
+            return []
+        live = []
+        if cls.SERPAPI_API_KEY and cls.source_enabled("web"):
+            live.append("web")
+        if cls.source_enabled("encyclopedia"):
+            live.append("Wikipedia")
+        if cls.source_enabled("academic"):
+            live.append("ArXiv")
+        if cls.source_enabled("code"):
+            live.append("GitHub")
+        if cls.NEWSAPI_KEY and cls.source_enabled("news"):
+            live.append("news")
+        return live
+
+    @classmethod
+    def _evidence_label(cls) -> str:
+        live = cls.live_sources()
+        real = ", ".join(live) if live else "none"
+        if cls.SERPAPI_API_KEY and cls.source_enabled("web"):
+            return f"real sources: {real}"
+        return f"real sources: {real}; web results are mock placeholders (no SERPAPI_API_KEY)"
+
+    @classmethod
     def capability_mode(cls) -> Dict[str, str]:
         """Single source of truth for 'what will this system do for me right now'.
 
@@ -93,7 +134,7 @@ class Config:
                 "mode": "full",
                 "label": "Full intelligence",
                 "reasoning": "LLM-powered",
-                "evidence": "real web + academic sources",
+                "evidence": cls._evidence_label(),
                 "expect": (
                     "Real research: ~30s-3min per query, up to $0.50 "
                     "(circuit-breaker enforced). Cited sources, contradiction "
@@ -104,13 +145,13 @@ class Config:
         if llm:
             return {
                 "mode": "llm_only",
-                "label": "LLM reasoning, mock evidence",
+                "label": "LLM reasoning, mock web evidence",
                 "reasoning": "LLM-powered",
-                "evidence": "mock placeholders (no SERPAPI_API_KEY)",
+                "evidence": cls._evidence_label(),
                 "expect": (
-                    "Smart intent/planning/gap analysis, but evidence is "
-                    "placeholder data. Confidence is capped at 40%. Do not act "
-                    "on findings."
+                    "Smart intent/planning/gap analysis. Keyless sources add "
+                    "some real evidence, but web results are placeholders, so "
+                    "confidence is capped at 40%. Do not act on findings."
                 ),
                 "upgrade": "Add SERPAPI_API_KEY in .env for real web evidence.",
             }
@@ -119,7 +160,7 @@ class Config:
                 "mode": "search_only",
                 "label": "Real evidence, heuristic reasoning",
                 "reasoning": "heuristic (deterministic rules)",
-                "evidence": "real web + academic sources",
+                "evidence": cls._evidence_label(),
                 "expect": (
                     "Real sources gathered and scored, but planning and gap "
                     "analysis use fixed rules; contradictions are not checked."
@@ -130,11 +171,12 @@ class Config:
             "mode": "heuristic",
             "label": "Heuristic demo (no API keys)",
             "reasoning": "heuristic (deterministic rules)",
-            "evidence": "mock placeholders",
+            "evidence": cls._evidence_label(),
             "expect": (
-                "Free and instant. Demonstrates the full workflow with "
-                "placeholder evidence. Confidence is capped at 40%. Do not act "
-                "on findings."
+                "Free. Demonstrates the full workflow; keyless sources "
+                "(Wikipedia, ArXiv, GitHub) add some real evidence, but web "
+                "results are placeholders, so confidence is capped at 40%. "
+                "Do not act on findings."
             ),
             "upgrade": (
                 "Copy .env.example to .env and add OPENAI_API_KEY (reasoning) "
