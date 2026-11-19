@@ -22,10 +22,14 @@ Return a JSON array (possibly empty). Each contradiction:
 
 Return only valid JSON, no prose."""
 
-# Base credibility by source type (1.0 scale).
+# Base credibility by source type (1.0 scale). Encyclopedias are tertiary
+# summaries; repositories show what exists and is maintained, not whether
+# claims about it are true.
 _SOURCE_CREDIBILITY = {
     "academic": 0.9,
+    "encyclopedia": 0.65,
     "news": 0.6,
+    "code": 0.55,
     "web": 0.5,
 }
 

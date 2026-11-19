@@ -46,7 +46,7 @@ These are marked, not resolved — consistent with the MVP rule
 
 | Gap | Why deferred |
 |---|---|
-| Evidence quality depends on SerpAPI's free tier (100 queries/month) | Acceptable for MVP validation; add more sources (NewsAPI, GitHub, Wikipedia) in Phase 2 |
+| Evidence quality depends on SerpAPI's free tier (100 queries/month) | Partly addressed in Phase 2: Wikipedia, ArXiv and GitHub now add real evidence with no key, NewsAPI with one. Web results are still mocked without SerpAPI, so the 40% cap still applies in keyless modes |
 | Heuristic mode can't detect contradictions | Requires an LLM by nature; reports say "Not checked" rather than implying a clean bill |
 | Archive search is substring-based, not semantic | JSONL + full-text is the MVP spec; vector embeddings (ChromaDB) are Phase 2 |
 | Cost figures are estimates from published per-token prices | Exact billing requires provider-side reconciliation; estimates are conservative and the circuit breaker fires on the estimate |
